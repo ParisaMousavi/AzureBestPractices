@@ -1,0 +1,24 @@
+# Create the ResearchVnet virtual network
+
+RG=""
+
+az network vnet create \
+    --resource-group $RG \
+    --name ResearchVnet \
+    --address-prefix 10.40.40.0/24 \
+    --location westindia
+
+az network vnet subnet create \
+    --resource-group $RG \
+    --vnet-name ResearchVnet \
+    --name ResearchSystemSubnet \
+    --address-prefixes 10.40.40.0/24
+
+az network vnet subnet list \
+    --resource-group $RG \
+    --vnet-name ResearchVnet \
+    --output table
+
+AddressPrefix    Name                  ProvisioningState    ResourceGroup
+---------------  --------------------  -------------------  -------------------------------------------
+10.40.40.0/24    ResearchSystemSubnet  Succeeded            <your resource group name>

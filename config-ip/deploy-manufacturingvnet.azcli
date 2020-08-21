@@ -1,0 +1,45 @@
+# Create the ManufacturingVnet virtual network
+
+RG="MyResourceGroupName"
+
+az network vnet create \
+    --resource-group $RG \
+    --name ManufacturingVnet \
+    --address-prefix 10.30.0.0/16 \
+    --location northeurope
+
+az network vnet subnet create \
+    --resource-group $RG \
+    --vnet-name ManufacturingVnet \
+    --name ManufacturingSystemSubnet \
+    --address-prefixes 10.30.10.0/24
+
+az network vnet subnet create \
+    --resource-group $RG \
+    --vnet-name ManufacturingVnet \
+    --name SensorSubnet1 \
+    --address-prefixes 10.30.20.0/24
+
+az network vnet subnet create \
+    --resource-group $RG \
+    --vnet-name ManufacturingVnet \
+    --name SensorSubnet2 \
+    --address-prefixes 10.30.21.0/24
+
+az network vnet subnet create \
+    --resource-group $RG \
+    --vnet-name ManufacturingVnet \
+    --name SensorSubnet3 \
+    --address-prefixes 10.30.22.0/24
+
+az network vnet subnet list \
+    --resource-group $RG \
+    --vnet-name ManufacturingVnet \
+    --output table
+
+AddressPrefix    Name                       ProvisioningState    ResourceGroup
+---------------  -------------------------  -------------------  -------------------------------------------
+10.30.10.0/24    ManufacturingSystemSubnet  Succeeded            <your resource group name>
+10.30.20.0/24    SensorSubnet1              Succeeded            <your resource group name>
+10.30.21.0/24    SensorSubnet2              Succeeded            <your resource group name>
+10.30.22.0/24    SensorSubnet3              Succeeded            <your resource group name>

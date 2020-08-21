@@ -1,0 +1,46 @@
+#Create the CoreServicesVnet virtual network
+
+RG="MyResourceGroupName"
+
+az network vnet create \
+    --resource-group $RG \
+    --name CoreServicesVnet \
+    --address-prefix 10.20.0.0/16 \
+    --location westus
+
+# Based on requirements
+# - a subnet for VPN gateway 
+# - the name of the subnet must be "GatewaySubnet"
+# - the mask of the GatewaySubnet must be /27
+az network vnet subnet create --resource-group $RG --vnet-name "CoreServicesVnet " --name "GatewaySubnet" --address-prefixes 10.20.0.0/27
+
+
+az network vnet subnet create \
+    --resource-group $RG \
+    --vnet-name CoreServicesVnet \
+    --name SharedServicesSubnet \
+    --address-prefixes 10.20.10.0/24
+
+az network vnet subnet create \
+    --resource-group $RG \
+    --vnet-name CoreServicesVnet \
+    --name DatabaseSubnet \
+    --address-prefixes 10.20.20.0/24
+
+az network vnet subnet create \
+    --resource-group $RG \
+    --vnet-name CoreServicesVnet \
+    --name PublicWebServiceSubnet \
+    --address-prefixes 10.20.30.0/24
+
+
+# List of subnets
+az network vnet subnet list --resource-group $RG --vnet-name "CoreServicesVnet" --output table
+
+# Expected output
+AddressPrefix    Name                    ProvisioningState    ResourceGroup
+---------------  ----------------------  -------------------  -------------------------------------------
+10.20.0.0/27     GatewaySubnet           Succeeded            <your resource group name>
+10.20.10.0/24    SharedServicesSubnet    Succeeded            <your resource group name>
+10.20.20.0/24    DatabaseSubnet          Succeeded            <your resource group name>
+10.20.30.0/24    PublicWebServiceSubnet  Succeeded            <your resource group name>
