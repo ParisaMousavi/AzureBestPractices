@@ -38,30 +38,6 @@ The **ResearchVnet** virtual network is deployed in the **West India** region, n
 ![alt](pics/5-design-implement-vnet-peering.svg)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Source:https://docs.microsoft.com/en-us/learn/modules/design-ip-addressing-for-azure/5-exercise-implement-vnets
+
+More Info [Onboarding : Azure Infrastructure](https://multi-cloud-solutions.com/onboarding-azure-infrastructure/)
