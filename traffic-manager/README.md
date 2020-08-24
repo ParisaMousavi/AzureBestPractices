@@ -25,5 +25,6 @@ There are two script file available for deploying a Traffic Manager Profile with
 [Priority Routing method CLI](traffic-manager-priority.azcli)
 [Performance Routing method CLI](traffic-manager-performance.azcli)
 
+For more info about Azure Traffic Manager refer to this [link](https://multi-cloud-solutions.com/2020/08/08/onboarding-azure-application-resilience/#traffic-manager).
 
 Source: https://docs.microsoft.com/en-us/learn/modules/distribute-load-with-traffic-manager/3-exercise-priority-routing
