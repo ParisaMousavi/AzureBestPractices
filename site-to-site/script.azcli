@@ -1,0 +1,140 @@
+# This VPN will allow your on-premises servers to connect to resources in Azure.
+# You can then start to securely share data from each of your sites, and you can use resources hosted in Azure across your organization.
+
+# Create the Azure-side resources
+az network vnet create \
+    --resource-group [sandbox resource group name] \
+    --name Azure-VNet-1 \
+    --address-prefix 10.0.0.0/16 \
+    --subnet-name Services \
+    --subnet-prefix 10.0.0.0/24
+# add the GatewaySubnet subnet to Azure-VNet-1.
+az network vnet subnet create \
+    --resource-group [sandbox resource group name] \
+    --vnet-name Azure-VNet-1 \
+    --address-prefix 10.0.255.0/27 \
+    --name GatewaySubnet
+
+# create the LNG-HQ-Network local network gateway.
+# This gateway represents the on-premises network that you're connecting to
+# The IP address specified as the remote gateway (which is the simulated on-premises network)
+# will need to be updated later because it doesn't exist yet in our scenario.
+az network local-gateway create \
+    --resource-group [sandbox resource group name] \
+    --gateway-ip-address 94.0.252.160 \
+    --name LNG-HQ-Network \
+    --local-address-prefixes 172.16.0.0/16
+
+# Create the simulated on-premises network and supporting resources
+az network vnet create \
+    --resource-group [sandbox resource group name] \
+    --name HQ-Network \
+    --address-prefix 172.16.0.0/16 \
+    --subnet-name Applications \
+    --subnet-prefix 172.16.0.0/24
+
+# add GatewaySubnet to HQ-Network
+az network vnet subnet create \
+    --resource-group [sandbox resource group name] \
+    --address-prefix 172.16.255.0/27 \
+    --name GatewaySubnet \
+    --vnet-name HQ-Network
+
+# create the LNG-Azure-VNet-1 local network gateway.
+# This gateway describes the Azure network that you're connecting to.
+# You'll update the IP address specified as the remote gateway (which is in Azure) later.
+az network local-gateway create \
+    --resource-group [sandbox resource group name] \
+    --gateway-ip-address 94.0.252.160 \
+    --name LNG-Azure-VNet-1 \
+    --local-address-prefixes 10.0.0.0/16   
+
+# Verify the topology
+az network vnet list --output table
+
+az network local-gateway list \
+    --resource-group [sandbox resource group name] \
+    --output table
+
+# Create the Azure-side VPN gateway
+az network public-ip create \
+    --resource-group [sandbox resource group name] \
+    --name PIP-VNG-Azure-VNet-1 \
+    --allocation-method Dynamic
+
+az network vnet-gateway create \
+    --resource-group [sandbox resource group name] \
+    --name VNG-Azure-VNet-1 \
+    --public-ip-address PIP-VNG-Azure-VNet-1 \
+    --vnet Azure-VNet-1 \
+    --gateway-type Vpn \
+    --vpn-type RouteBased \
+    --sku VpnGw1 \
+    --no-wait
+
+# Create the on-premises VPN gateway
+az network public-ip create \
+    --resource-group [sandbox resource group name] \
+    --name PIP-VNG-HQ-Network \
+    --allocation-method Dynamic
+
+az network vnet-gateway create \
+    --resource-group [sandbox resource group name] \
+    --name VNG-HQ-Network \
+    --public-ip-address PIP-VNG-HQ-Network \
+    --vnet HQ-Network \
+    --gateway-type Vpn \
+    --vpn-type RouteBased \
+    --sku VpnGw1 \
+    --no-wait
+
+# To monitor the progress of the gateway creation, run the following command
+watch -d -n 5 az network vnet-gateway list \
+    --resource-group [sandbox resource group name] \
+    --output table
+
+# Update the local network gateway IP references
+az network vnet-gateway list \
+    --resource-group [sandbox resource group name] \
+    --query "[?provisioningState=='Succeeded']" \
+    --output table
+
+# retrieve the IPv4 address assigned to PIP-VNG-Azure-VNet-1 and store it in a variable.
+PIPVNGAZUREVNET1=$(az network public-ip show \
+    --resource-group [sandbox resource group name] \
+    --name PIP-VNG-Azure-VNet-1 \
+    --query "[ipAddress]" \
+    --output tsv)
+
+az network local-gateway update \
+    --resource-group [sandbox resource group name] \
+    --name LNG-Azure-VNet-1 \
+    --gateway-ip-address $PIPVNGAZUREVNET1
+
+# Create the connections
+# Create the shared key to use for the connections
+SHAREDKEY=<shared key>
+
+# create a connection from VNG-Azure-VNet-1 to LNG-HQ-Network.
+az network vpn-connection create \
+    --resource-group [sandbox resource group name] \
+    --name Azure-VNet-1-To-HQ-Network \
+    --vnet-gateway1 VNG-Azure-VNet-1 \
+    --shared-key $SHAREDKEY \
+    --local-gateway2 LNG-HQ-Network
+
+# This connection would normally be created from your on-premises device.
+# Run this command in Cloud Shell to create a connection from VNG-HQ-Network to LNG-Azure-VNet-1.
+az network vpn-connection create \
+    --resource-group [sandbox resource group name] \
+    --name HQ-Network-To-Azure-VNet-1  \
+    --vnet-gateway1 VNG-HQ-Network \
+    --shared-key $SHAREDKEY \
+    --local-gateway2 LNG-Azure-VNet-1
+
+# Verification steps
+az network vpn-connection show \
+    --resource-group [sandbox resource group name] \
+    --name Azure-VNet-1-To-HQ-Network  \
+    --output table \
+    --query '{Name:name,ConnectionStatus:connectionStatus}'
