@@ -1,0 +1,57 @@
+# Create a Traffic Manager profile using performance routing
+az network traffic-manager profile create \
+    --resource-group learn-0b7e0ce9-394c-407c-9d90-09d4fcf4ce72 \
+    --name TM-MusicStream-Performance \
+    --routing-method Performance \
+    --unique-dns-name TM-MusicStream-Performance-$RANDOM \
+    --output table
+
+# Create two new endpoints that point to the public IP addresses of the virtual machines.
+WestId=$(az network public-ip show \
+    --resource-group learn-0b7e0ce9-394c-407c-9d90-09d4fcf4ce72 \
+    --name westus2-vm-nic-pip \
+    --query id \
+    --out tsv)
+
+az network traffic-manager endpoint create \
+    --resource-group learn-0b7e0ce9-394c-407c-9d90-09d4fcf4ce72 \
+    --profile-name TM-MusicStream-Performance \
+    --name "WestUS" \
+    --type azureEndpoints \
+    --target-resource-id $WestId
+
+EastId=$(az network public-ip show \
+    --resource-group learn-0b7e0ce9-394c-407c-9d90-09d4fcf4ce72 \
+    --name eastasia-vm-nic-pip \
+    --query id \
+    --out tsv)
+
+az network traffic-manager endpoint create \
+    --resource-group learn-0b7e0ce9-394c-407c-9d90-09d4fcf4ce72 \
+    --profile-name TM-MusicStream-Performance \
+    --name "EastAsia" \
+    --type azureEndpoints \
+    --target-resource-id $EastId
+
+# Test the new configuration
+echo http://$(az network traffic-manager profile show \
+    --resource-group learn-0b7e0ce9-394c-407c-9d90-09d4fcf4ce72 \
+    --name TM-MusicStream-Performance \
+    --query dnsConfig.fqdn \
+    --output tsv)
+# output: http://tm-musicstream-performance-14176.trafficmanager.net/
+
+# Use nslookup to resolve the Traffic Manager profile domain name
+nslookup $(az network traffic-manager profile show \
+        --resource-group learn-0b7e0ce9-394c-407c-9d90-09d4fcf4ce72 \
+        --name TM-MusicStream-Performance \
+        --query dnsConfig.fqdn \
+        --output tsv)
+# The nslookup command returns where the domain name resolves. For example, if you're closest to Europe, it returns the following.
+Non-authoritative answer:
+tm-musicstream-performance-14176.trafficmanager.net     canonical name = westus2-vm-w4d2yiculixei.westus2.cloudapp.azure.com.
+Name:   westus2-vm-w4d2yiculixei.westus2.cloudapp.azure.com
+Address: 52.247.202.155
+
+
+
