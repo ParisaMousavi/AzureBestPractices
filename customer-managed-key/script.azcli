@@ -1,0 +1,42 @@
+
+# This script expapines how to encrypt the data at rest in storage account by using
+# customer-managed keys 
+
+RG=RG$RANDOM
+STORAGE=st$RANDOM
+KEYVAULT=ky$RANDOM
+KEY=key$RANDOM
+LOCATION=westeurope
+
+az login
+
+az account list
+
+az account set --subscription <subscription-id>
+
+az group create --name $RG --location $LOCATION
+
+# Assign a managed identity to storage account
+az storage account create --resource-group $RG --name $STORAGE # --sku Standard_RAGRS (default) --kind StorageV2 (default)
+az storage account update --resource-group $RG --name $STORAGE --assign-identity 
+
+
+# create a key vault which has SoftDelete and Do Not Purge
+az keyvault create --resource-group $RG --name $KEYVAULT --location $LOCATION --enable-soft-delete --enable-purge-protection
+
+# get the managed identiry ID
+STORAGE_ACCOUNT_PRINCIPAL=$(az storage account show --name $STORAGE --resource-group $RG --query identity.principalId --output tsv)
+
+
+# set the access policy for storage identity on keyvault
+az keyvault set-policy --name $KEYVAULT --resource-group $RG --object-id $STORAGE_ACCOUNT_PRINCIPAL --key-permissions get recover unwrapkey wrapkey
+
+# create a key
+az keyvault key create --vault-name $KEYVAULT --name $KEY
+
+# configure storage to use the key for encryption
+key_vault_uri=$(az keyvault show --resource-group $RG --name $KEYVAULT --query properties.vaultUri --output tsv)
+
+key_version=$(az keyvault key list-versions --vault-name $KEYVAULT --name $KEY --query [].kid --output tsv | cut -d '/' -f 6)
+
+az storage account update --resource-group $RG --name $STORAGE --encryption-key-name $KEY --encryption-key-version $key_version --encryption-key-source Microsoft.Keyvault --encryption-key-vault $key_vault_uri
