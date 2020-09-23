@@ -2,6 +2,8 @@
   - [Azure Infrastructure](#azure-infrastructure)
     - [Create Site-to-Site VPN](#create-site-to-site-vpn)
     - [Azure IP config](#azure-ip-config)
+  - [Azure Infrastructure Deployment](#azure-infrastructure-deployment)
+    - [Deploy Azure Resource Manager templates](#deploy-azure-resource-manager-templates)
   - [Azure Data Encryption](#azure-data-encryption)
     - [Encrypt Storage Data at Rest with customer-managed key](#encrypt-storage-data-at-rest-with-customer-managed-key)
 
@@ -23,6 +25,26 @@ Two types of IP addresses are available on Azure
   - **dynamic**: is created and assigned to a resource when needed. When the resource is deleted, the IP is deleted as well.
 
 The az script and more info are availble [here](config-ip/README.md).
+
+## Azure Infrastructure Deployment
+
+We have serveral available provisioing solutions:
+- Custome scripts (VMs)
+- Desired State Configuration Extensions (VMs)
+- Chef Server
+- Terraform (all resources)
+- Azure Automation State Configuration
+- Azure Resource Manager templates (all resources)
+
+For more info about the other option refer to [Onboarding : Azure Infrastructure deployment](https://multi-cloud-solutions.com/2020/08/11/onboarding-azure-infrastructure-deployment/).
+
+### Deploy Azure Resource Manager templates
+1. We can use the Quick Start Templates to create our required template
+2. We have to validate the template
+3. Deploy the template via Azure UI, Powershell, CLI
+
+The commands for validating and deploying via CLI are available in the script [here](deploy-arm-template/script.azcli). 
+
 
 ## Azure Data Encryption
 
