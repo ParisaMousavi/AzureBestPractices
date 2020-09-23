@@ -45,6 +45,10 @@ For more info about the other option refer to [Onboarding : Azure Infrastructure
 
 The commands for validating and deploying via CLI are available in the script [here](deploy-arm-template/script.azcli). 
 
+**Extend VM Configuration after deploy**
+We can use `Custom Script Extension` for VMs to install something or apply some changes after deploy the VM.
+
+In the Script [here](deploy-arm-template/script-custom-script-extension.azcli) we see we can either run the `Custome Script Extension` via CLI or add it to the ARM template.
 
 ## Azure Data Encryption
 

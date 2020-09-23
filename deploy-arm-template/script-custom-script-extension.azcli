@@ -1,0 +1,27 @@
+# Requirements:
+# Create a VM.
+# Open port 80 through the network firewall.
+# Install and configure web server software on your VM.
+
+az vm extension set \
+  --resource-group $RESOURCEGROUP \
+  --vm-name SimpleWinVM \
+  --name CustomScriptExtension \
+  --publisher Microsoft.Compute \
+  --version 1.9 \
+  --settings '{"fileUris":["https://raw.githubusercontent.com/MicrosoftDocs/mslearn-welcome-to-azure/master/configure-iis.ps1"]}' \
+  --protected-settings '{"commandToExecute": "powershell -ExecutionPolicy Unrestricted -File configure-iis.ps1"}' # the script to enable IIS
+
+
+# This is the content of the configure-iis.ps1 file
+#--------------------------------------------------------------
+# Install IIS.
+dism /online /enable-feature /featurename:IIS-WebServerRole
+
+# Set the home page.
+Set-Content `
+  -Path "C:\\inetpub\\wwwroot\\Default.htm" `
+  -Value "<html><body><h2>Welcome to Azure! My name is $($env:computername).</h2></body></html>"
+#--------------------------------------------------------------
+
+
