@@ -1,0 +1,38 @@
+# define parameters for ARM template
+RESOURCEGROUP=learn-quickstart-vm-rg
+LOCATION=eastus
+USERNAME=azureuser
+PASSWORD=$(openssl rand -base64 32)
+
+# create resource group
+az group create --name $RESOURCEGROUP --location $LOCATION
+
+# validate the template
+az deployment group validate \
+  --resource-group $RESOURCEGROUP \
+  --template-uri "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/101-vm-simple-windows/azuredeploy.json" \
+  --parameters adminUsername=$USERNAME \
+  --parameters adminPassword=$PASSWORD \
+  --parameters dnsLabelPrefix=$DNS_LABEL_PREFIX
+
+# deploy the template
+az deployment group create \
+  --name MyDeployment \
+  --resource-group $RESOURCEGROUP \
+  --template-uri "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/101-vm-simple-windows/azuredeploy.json" \
+  --parameters adminUsername=$USERNAME \
+  --parameters adminPassword=$PASSWORD \
+  --parameters dnsLabelPrefix=$DNS_LABEL_PREFIX
+
+  # verify the deployment
+  az deployment group show \
+  --name MyDeployment \
+  --resource-group $RESOURCEGROUP
+
+
+  # list the vms
+  az vm list \
+  --resource-group $RESOURCEGROUP \
+  --output table
+
+  
