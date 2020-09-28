@@ -6,6 +6,8 @@
     - [Deploy Azure Resource Manager templates](#deploy-azure-resource-manager-templates)
   - [Azure Data Encryption](#azure-data-encryption)
     - [Encrypt Storage Data at Rest with customer-managed key](#encrypt-storage-data-at-rest-with-customer-managed-key)
+  - [Azure Virtual Machines](#azure-virtual-machines)
+    - [Create an image from a generalized VM](#create-an-image-from-a-generalized-vm)
 
 
 # Azure Samples
@@ -59,3 +61,11 @@ The prerequisites are
 - Azure Key Vault with a Key
 - Set the access policy for Storage Account on KeyVault
 The az script to create it is available [here](customer-managed-key/script.azcli).
+
+
+## Azure Virtual Machines
+
+### Create an image from a generalized VM
+For creating a VM Image, the vm have to be generalized. This is the [link](generalizing-vm/script.azcli) to the code for generalizing.
+
+It can be done via Azure UI as well.

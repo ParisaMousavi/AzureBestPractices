@@ -1,0 +1,48 @@
+# NetworkWatcherRG
+RGROUP=$(az group create --name vmbackups --location westus2 --output tsv --query name)
+
+# Create a Windows virtual machine
+az vm create \
+    --resource-group $RGROUP \
+    --name NW-APP01 \
+    --size Standard_DS1_v2 \
+    --vnet-name NorthwindInternal \
+    --subnet NorthwindInternal1 \
+    --image Win2016Datacenter \
+    --admin-username admin123 \
+    --no-wait \
+    --admin-password <password>
+
+# Create a Linux virtual machine
+az vm create \
+    --resource-group $RGROUP \
+    --name NW-RHEL01 \
+    --size Standard_DS1_v2 \
+    --image RedHat:RHEL:7-RAW:latest \
+    --authentication-type ssh \
+    --generate-ssh-keys \
+    --vnet-name NorthwindInternal \
+    --subnet NorthwindInternal1
+
+# enable a backup for the NW-APP01 virtual machine
+az backup protection enable-for-vm \
+    --resource-group vmbackups \
+    --vault-name azure-backup \
+    --vm NW-APP01 \
+    --policy-name DefaultPolicy
+
+# Monitor the progress of the setup 
+az backup job list \
+    --resource-group vmbackups \
+    --vault-name azure-backup \
+    --output table
+
+# Do an initial backup of the virtual machine, instead of waiting for the schedule to run it.
+az backup protection backup-now \
+    --resource-group vmbackups \
+    --vault-name azure-backup \
+    --container-name NW-APP01 \
+    --item-name NW-APP01 \
+    --retain-until 18-10-2030 \
+    --backup-management-type AzureIaasVM
+

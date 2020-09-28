@@ -1,0 +1,17 @@
+# Generalize a Windows virtual machine
+
+rg=lesson-vm-generalizing
+
+# Stop-AzVM -ResourceGroupName $rg  -Name "my-vm"   -Force
+az vm stop --resource-group $rg --name "my-vm" --verbose
+
+az vm deallocate  --resource-group $rg  --name "my-vm"
+
+
+az vm generalize --resource-group $rg --name $rg
+# Set-AzVM -ResourceGroupName <resource group> `
+#     -Name <virtual machine name> `
+#     -Generalize
+
+
+az vm capture --resource-group $rg --name "my-vm" --vhd-name-prefix "my-perfix"
