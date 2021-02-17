@@ -17,6 +17,7 @@ namespace Company.Function
         {
             var outputs = new List<string>();
 
+            System.Threading.Thread.Sleep(10000);
             // Replace "hello" with the name of your Durable Activity Function.
             outputs.Add(await context.CallActivityAsync<string>("HelloOrchestration_Hello", "Tokyo"));
             outputs.Add(await context.CallActivityAsync<string>("HelloOrchestration_Hello", "Seattle"));
@@ -29,6 +30,8 @@ namespace Company.Function
         [FunctionName("HelloOrchestration_Hello")]
         public static string SayHello([ActivityTrigger] string name, ILogger log)
         {
+            System.Threading.Thread.Sleep(10000);
+
             log.LogInformation($"Saying hello to {name}.");
             return $"Hello {name}!";
         }
